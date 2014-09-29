@@ -45,7 +45,7 @@ public class Heap<T extends Comparable<T>> {
 
 	public T deleteMax() {
 		T res = array.get(0); // O(1)
-		array.add(0, array.get(array.size() - 1)); // O(1)
+		array.set(0, array.get(array.size() - 1)); // O(1)
 		array.remove(array.size() - 1); // O(1)
 		int index = 0;
 		while (index < array.size()) {
@@ -79,8 +79,8 @@ public class Heap<T extends Comparable<T>> {
 
 	private void swap(int fromIndex, int toIndex) {
 		T temp = array.get(fromIndex);
-		array.add(fromIndex, array.get(toIndex));
-		array.add(toIndex, temp);
+		array.set(fromIndex, array.get(toIndex));
+		array.set(toIndex, temp);
 	}
 
 	public boolean isEmpty() {
