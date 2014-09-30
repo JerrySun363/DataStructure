@@ -31,7 +31,6 @@ public class LRU<K, V> {
 			this.tail = new DoubleLinkedListNode<K, V>();
 			this.head.next = tail;
 			this.tail.prev = head;
-			count = 0;
 		}
 
 		public void addHead(DoubleLinkedListNode<K, V> item) {
@@ -42,20 +41,31 @@ public class LRU<K, V> {
 			count++;
 		}
 
+		public DoubleLinkedListNode<K, V> extractNode(
+				DoubleLinkedListNode<K, V> item) {
+			item.prev.next = item.next;
+			item.next.prev = item.prev;
+			count--;
+			return item;
+		}
+
 		public K removeTail() {
 			if (count == 0) {
 				return null;
 			}
-			this.tail.prev = this.tail.prev.prev;
-			this.tail.prev.next = tail;
 			K res = tail.prev.key;
+			this.tail.prev = this.tail.prev.prev;
+			this.tail.prev.next = this.tail;
 			count--;
 			return res;
+		}
+
+		public int size() {
+			return count;
 		}
 	}
 
 	private int capcity;
-	private int size;
 	private DoubleLinkedList<K, V> list;
 	private HashMap<K, DoubleLinkedListNode<K, V>> map;
 
@@ -68,15 +78,17 @@ public class LRU<K, V> {
 	public void set(K key, V value) {
 		if (this.map.containsKey(key)) {
 			DoubleLinkedListNode<K, V> node = this.map.get(key);
-			node.prev.next = node.next;
-			node.next.prev = node.prev;
+			node = list.extractNode(node);
+			node.value = value;
 			this.list.addHead(node);
 		} else {
-			this.list.addHead(new DoubleLinkedListNode<K, V>(key, value));
-			this.size++;
-			if (size == this.capcity) {
-				this.list.removeTail();
-				this.size--;
+			DoubleLinkedListNode<K, V> node = new DoubleLinkedListNode<K, V>(
+					key, value);
+			this.list.addHead(node);
+			this.map.put(key, node);
+			if (list.size() > this.capcity) {
+				K delkey = this.list.removeTail();
+				this.map.remove(delkey);
 			}
 		}
 
@@ -87,8 +99,7 @@ public class LRU<K, V> {
 		if (node == null) {
 			return null;
 		}
-		node.prev.next = node.next;
-		node.next.prev = node.prev;
+		node = list.extractNode(node);
 		this.list.addHead(node);
 		return node.value;
 	}
